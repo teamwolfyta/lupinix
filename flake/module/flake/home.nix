@@ -6,10 +6,15 @@
   withSystem,
   ...
 }: let
-  inherit (lib) types;
-  inherit (lib.attrsets) attrValues hasAttr mapAttrs;
-  inherit (lib.modules) mkIf;
-  inherit (lib.options) mkOption;
+  inherit
+    (lib)
+    attrValues
+    hasAttr
+    mapAttrs
+    mkIf
+    mkOption
+    types
+    ;
 
   inherit (config.lupinix.home) modules;
 in {
