@@ -11,8 +11,8 @@
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkOption;
 
-  conf_configurations = config.lupinix.nixos.configurations or {};
-  conf_modules = config.lupinix.nixos.modules or {};
+  conf_configurations = config.lupinix.nixos.configurations;
+  conf_modules = config.lupinix.nixos.modules;
 in {
   options.lupinix.nixos = {
     configurations = mkOption {

@@ -11,8 +11,8 @@
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkOption;
 
-  conf_configurations = config.lupinix.home.configurations or {};
-  conf_modules = config.lupinix.home.modules or {};
+  conf_configurations = config.lupinix.home.configurations;
+  conf_modules = config.lupinix.home.modules;
 in {
   options.lupinix.home = {
     configurations = mkOption {
