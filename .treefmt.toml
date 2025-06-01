@@ -1,0 +1,15 @@
+excludes = [".envrc", "*.lock", ".gitignore"]
+on-unmatched = "warn"
+
+[formatter.alejandra]
+command = "alejandra"
+includes = ["*.nix"]
+
+[formatter.mdformat]
+command = "mdformat"
+includes = ["*.md"]
+
+[formatter.taplo]
+command = "taplo"
+includes = ["*.toml"]
+options = ["format"]
