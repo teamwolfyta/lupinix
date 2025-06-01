@@ -11,43 +11,66 @@
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkOption;
 
-  conf_configurations = config.lupinix.home.configurations;
-  conf_modules = config.lupinix.home.modules;
+  inherit (config.lupinix.home) modules;
 in {
   options.lupinix.home = {
     configurations = mkOption {
-      type = types.lazyAttrsOf types.raw;
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            system = mkOption {
+              type = types.str;
+            };
+            configuration = mkOption {
+              type = types.unspecified;
+            };
+          };
+        }
+      );
       default = {};
     };
     modules = mkOption {
-      type = types.lazyAttrsOf types.raw;
+      type = types.attrsOf types.deferredModule;
       default = {};
     };
   };
 
   config.flake = {
-    homeConfigurations = mkIf (hasAttr "home-manager" inputs) (mapAttrs (
-        userName: userConfig: (withSystem userConfig.nixpkgs.hostPlatform ({
-          pkgs,
-          self',
-          inputs',
-          system,
-          ...
-        }:
-          inputs.home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            specialArgs = {inherit system inputs self inputs' self';};
-            modules =
-              [
-                {
-                  home.username = userName;
-                }
-                userConfig
-              ]
-              ++ (attrValues conf_modules);
-          }))
+    homeConfigurations = mkIf (hasAttr "home-manager" inputs) (
+      mapAttrs (
+        userName: userConfig: (withSystem userConfig.system (
+          {
+            pkgs,
+            self',
+            inputs',
+            system,
+            ...
+          }:
+            inputs.home-manager.lib.homeManagerConfiguration {
+              inherit pkgs;
+              specialArgs = {
+                inherit
+                  system
+                  inputs
+                  self
+                  inputs'
+                  self'
+                  ;
+              };
+              modules =
+                [
+                  {
+                    home.username = userName;
+                  }
+                  userConfig.configuration
+                ]
+                ++ (attrValues modules);
+            }
+        ))
       )
-      conf_configurations);
-    homeModules = conf_modules;
+      config.lupinix.home.configurations
+    );
+
+    homeModules = modules;
   };
 }

@@ -6,49 +6,69 @@
   withSystem,
   ...
 }: let
-  inherit (lib) types;
+  inherit (lib) types mkIf mkOption;
   inherit (lib.attrsets) attrValues hasAttr mapAttrs;
-  inherit (lib.modules) mkIf;
-  inherit (lib.options) mkOption;
 
-  conf_configurations = config.lupinix.nixos.configurations;
-  conf_modules = config.lupinix.nixos.modules;
+  inherit (config.lupinix.nixos) modules;
 in {
   options.lupinix.nixos = {
     configurations = mkOption {
-      type = types.lazyAttrsOf types.raw;
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            system = mkOption {
+              type = types.str;
+            };
+            configuration = mkOption {
+              type = types.unspecified;
+            };
+          };
+        }
+      );
       default = {};
     };
     modules = mkOption {
-      type = types.lazyAttrsOf types.raw;
+      type = types.attrsOf types.deferredModule;
       default = {};
     };
   };
 
   config.flake = {
-    nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (mapAttrs (
-        hostName: hostConfig: (withSystem hostConfig.nixpkgs.hostPlatform ({
-          inputs',
-          self',
-          system,
-          ...
-        }:
-          inputs.nixpkgs.lib.nixosSystem {
-            inherit system;
-            specialArgs = {inherit system inputs self inputs' self';};
-            modules =
-              [
-                {
-                  networking = {
-                    inherit hostName;
-                  };
-                }
-                hostConfig
-              ]
-              ++ (attrValues conf_modules);
-          }))
+    nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (
+      mapAttrs (
+        hostName: hostConfig:
+          withSystem hostConfig.system (
+            {
+              inputs',
+              self',
+              system,
+              ...
+            }:
+              inputs.nixpkgs.lib.nixosSystem {
+                inherit system;
+                specialArgs = {
+                  inherit
+                    system
+                    inputs
+                    self
+                    inputs'
+                    self'
+                    ;
+                };
+                modules =
+                  [
+                    {
+                      networking.hostName = hostName;
+                    }
+                    hostConfig.configuration
+                  ]
+                  ++ (attrValues modules);
+              }
+          )
       )
-      conf_configurations);
-    nixosModules = conf_modules;
+      config.lupinix.nixos.configurations
+    );
+
+    nixosModules = modules;
   };
 }
