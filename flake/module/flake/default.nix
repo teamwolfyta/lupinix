@@ -1,6 +1,3 @@
 _: {
-  imports = [
-    ./home.nix
-    ./nixos.nix
-  ];
+  imports = import ./modules/modules-list.nix;
 }
