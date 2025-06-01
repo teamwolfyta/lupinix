@@ -1,4 +1,4 @@
 [
-  ./module/flake
+  ./module
   ./partitions
 ]
