@@ -1,8 +1,8 @@
 {config, ...}: {
   flake = {
-    flakeModule = config.flakeModules.default;
+    flakeModule = config.flake.flakeModules.default;
     flakeModules = {
-      default = config.flakeModules.lupinix;
+      default = config.flake.flakeModules.lupinix;
       lupinix = import ./flake;
     };
   };
