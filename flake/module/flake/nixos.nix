@@ -16,11 +16,11 @@
 in {
   options.lupinix.nixos = {
     configurations = mkOption {
-      type = types.attrsOf types.deferredModule;
+      type = types.lazyAttrsOf types.raw;
       default = {};
     };
     modules = mkOption {
-      type = types.attrsOf types.deferredModule;
+      type = types.lazyAttrsOf types.raw;
       default = {};
     };
   };
