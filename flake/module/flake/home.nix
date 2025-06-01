@@ -26,8 +26,7 @@ in {
   };
 
   config.flake = {
-    homeConfigurations =
-      mkIf (hasAttr "home-manager" inputs) mapAttrs (
+    homeConfigurations = mkIf (hasAttr "home-manager" inputs) (mapAttrs (
         userName: userConfig: (withSystem userConfig.nixpkgs.hostPlatform ({
           pkgs,
           self',
@@ -48,7 +47,7 @@ in {
               ++ (attrValues conf_modules);
           }))
       )
-      conf_configurations;
+      conf_configurations);
     homeModules = conf_modules;
   };
 }

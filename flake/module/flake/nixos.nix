@@ -26,8 +26,7 @@ in {
   };
 
   config.flake = {
-    nixosConfigurations =
-      mkIf (hasAttr "nixpkgs" inputs) mapAttrs (
+    nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (mapAttrs (
         hostName: hostConfig: (withSystem hostConfig.nixpkgs.hostPlatform ({
           inputs',
           self',
@@ -49,7 +48,7 @@ in {
               ++ (attrValues conf_modules);
           }))
       )
-      conf_configurations;
+      conf_configurations);
     nixosModules = conf_modules;
   };
 }
