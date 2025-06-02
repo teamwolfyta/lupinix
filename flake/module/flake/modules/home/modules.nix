@@ -8,13 +8,11 @@
     mkOption
     types
     ;
-
-  inherit (config.lupinix.home) modules;
 in {
   options.lupinix.home.modules = mkOption {
     type = types.attrsOf types.deferredModule;
     default = {};
   };
 
-  config.flake.homeModules = modules;
+  config.flake.homeModules = config.lupinix.home.modules;
 }
