@@ -19,6 +19,7 @@ glob = "*.toml"
 run = "taplo lint {staged_files}"
 
 [[pre-commit.jobs]]
+interactive = true
 name = "treefmt"
 run = "treefmt"
 stage_fixed = true
