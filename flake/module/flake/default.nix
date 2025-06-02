@@ -5,9 +5,9 @@
   self,
   withSystem,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     attrValues
     hasAttr
     mapAttrs
@@ -29,37 +29,39 @@
         };
       }
     );
-    default = {};
+    default = { };
   };
 
   mkModuleOption = mkOption {
     type = types.attrsOf types.deferredModule;
-    default = {};
+    default = { };
   };
 
   mkTypeOption = {
     modules = mkModuleOption;
     configurations = mkConfigOption;
   };
-in {
+in
+{
   options.lupinix = {
     nixos = mkTypeOption;
     home = mkTypeOption;
   };
 
-  config.flake = let
-    inherit
-      (config.lupinix)
-      nixos
-      home
-      ;
-  in rec {
-    nixosModules = nixos.modules;
-    homeModules = home.modules;
+  config.flake =
+    let
+      inherit (config.lupinix)
+        nixos
+        home
+        ;
+    in
+    rec {
+      nixosModules = nixos.modules;
+      homeModules = home.modules;
 
-    nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (
-      mapAttrs (
-        hostName: hostConfig:
+      nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (
+        mapAttrs (
+          hostName: hostConfig:
           withSystem hostConfig.system (
             {
               inputs',
@@ -67,32 +69,29 @@ in {
               system,
               ...
             }:
-              inputs.nixpkgs.lib.nixosSystem {
-                inherit system;
-                specialArgs = {
-                  inherit
-                    system
-                    inputs
-                    self
-                    inputs'
-                    self'
-                    ;
-                };
-                modules =
-                  [
-                    {networking.hostName = hostName;}
-                    hostConfig.configuration
-                  ]
-                  ++ (attrValues nixosModules);
-              }
+            inputs.nixpkgs.lib.nixosSystem {
+              inherit system;
+              specialArgs = {
+                inherit
+                  system
+                  inputs
+                  self
+                  inputs'
+                  self'
+                  ;
+              };
+              modules = [
+                { networking.hostName = hostName; }
+                hostConfig.configuration
+              ] ++ (attrValues nixosModules);
+            }
           )
-      )
-      nixos.configurations
-    );
+        ) nixos.configurations
+      );
 
-    homeConfigurations = mkIf (hasAttr "home-manager" inputs) (
-      mapAttrs (
-        userName: userConfig:
+      homeConfigurations = mkIf (hasAttr "home-manager" inputs) (
+        mapAttrs (
+          userName: userConfig:
           withSystem userConfig.system (
             {
               pkgs,
@@ -101,27 +100,24 @@ in {
               system,
               ...
             }:
-              inputs.home-manager.lib.homeManagerConfiguration {
-                inherit pkgs;
-                specialArgs = {
-                  inherit
-                    system
-                    inputs
-                    self
-                    inputs'
-                    self'
-                    ;
-                };
-                modules =
-                  [
-                    {home.username = userName;}
-                    userConfig.configuration
-                  ]
-                  ++ (attrValues homeModules);
-              }
+            inputs.home-manager.lib.homeManagerConfiguration {
+              inherit pkgs;
+              specialArgs = {
+                inherit
+                  system
+                  inputs
+                  self
+                  inputs'
+                  self'
+                  ;
+              };
+              modules = [
+                { home.username = userName; }
+                userConfig.configuration
+              ] ++ (attrValues homeModules);
+            }
           )
-      )
-      home.configurations
-    );
-  };
+        ) home.configurations
+      );
+    };
 }

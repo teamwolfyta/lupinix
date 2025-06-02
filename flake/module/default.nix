@@ -1,4 +1,5 @@
-{config, ...}: {
+{ config, ... }:
+{
   flake = {
     flakeModule = config.flake.flakeModules.default;
     flakeModules = {

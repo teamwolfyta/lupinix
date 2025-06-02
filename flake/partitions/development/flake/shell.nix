@@ -5,12 +5,12 @@
 }:
 mkShell {
   nativeBuildInputs = with pkgs; [
-    alejandra
     deadnix
     editorconfig-checker
     lefthook
     mdformat
     nil
+    nixfmt-rfc-style
     statix
     taplo
     treefmt

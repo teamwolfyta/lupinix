@@ -1,5 +1,8 @@
-{src ? ./.}: let
+{
+  src ? ./.,
+}:
+let
   inherit (builtins) getFlake;
   flake = getFlake (toString src);
 in
-  flake // {inherit flake;}
+flake // { inherit flake; }
