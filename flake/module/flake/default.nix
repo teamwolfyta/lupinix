@@ -21,11 +21,6 @@ let
     types
     ;
 
-  mkModuleOption = mkOption {
-    type = types.attrsOf types.deferredModule;
-    default = { };
-  };
-
   mkConfigOption = mkOption {
     type = types.attrsOf (
       types.submodule {
@@ -43,22 +38,26 @@ let
     default = { };
   };
 
+  mkModuleOption = mkOption {
+    type = types.attrsOf types.deferredModule;
+    default = { };
+  };
+
+  mkTypeOption = {
+    modules = mkModuleOption;
+    configurations = mkConfigOption;
+  };
+
   coreOptions = {
-    modules = {
-      nixos = mkModuleOption;
-      home = mkModuleOption;
-      hjem = mkModuleOption;
-    };
-    configurations = {
-      nixos = mkConfigOption;
-      home = mkConfigOption;
-      hjem = mkConfigOption;
-    };
+    nixos = mkTypeOption;
+    hjem = mkTypeOption;
+    home = mkTypeOption;
   };
 
   processClusterConfigs =
     {
-      type,
+      basePath,
+      configurations,
       clusters,
     }:
     foldl'
@@ -67,8 +66,8 @@ let
         let
           clusterName = cluster.name;
           clusterConfig = cluster.value;
-          clusterModules = clusterConfig.modules.${type};
-          clusterConfigs = clusterConfig.configurations.${type};
+          clusterModules = clusterConfig.${basePath}.modules;
+          clusterConfigs = clusterConfig.${basePath}.configurations;
         in
         acc
         // (mapAttrs' (
@@ -79,7 +78,7 @@ let
       { }
       (
         lib.attrsToList (
-          filterAttrs (_name: config: hasAttrByPath [ "configurations" type ] config) clusters
+          filterAttrs (_name: config: hasAttrByPath [ basePath "configurations" ] config) clusters
         )
       );
 in
@@ -96,14 +95,15 @@ in
     let
       inherit (config.lupinix)
         clusters
-        modules
-        configurations
+        nixos
+        hjem
+        home
         ;
     in
     rec {
-      nixosModules = modules.nixos;
-      homeModules = modules.home;
-      hjemModules = modules.hjem;
+      nixosModules = nixos.modules;
+      homeModules = home.modules;
+      hjemModules = hjem.modules;
 
       nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (
         mapAttrs
@@ -139,10 +139,11 @@ in
             )
           )
           (
-            configurations.nixos
+            nixos.configurations
             // processClusterConfigs {
-              type = "nixos";
               inherit clusters;
+              inherit (nixos) configurations;
+              basePath = "nixos";
             }
           )
       );
@@ -181,10 +182,11 @@ in
             )
           )
           (
-            configurations.home
+            home.configurations
             // processClusterConfigs {
-              type = "home";
               inherit clusters;
+              inherit (home) configurations;
+              basePath = "home";
             }
           )
       );
