@@ -50,6 +50,7 @@ let
 
   coreOptions = {
     nixos = mkTypeOption;
+    hjem = mkTypeOption;
     home = mkTypeOption;
   };
 
@@ -95,12 +96,14 @@ in
       inherit (config.lupinix)
         clusters
         nixos
+        hjem
         home
         ;
     in
     rec {
       nixosModules = nixos.modules;
       homeModules = home.modules;
+      hjemModules = hjem.modules;
 
       nixosConfigurations = mkIf (hasAttr "nixpkgs" inputs) (
         mapAttrs
