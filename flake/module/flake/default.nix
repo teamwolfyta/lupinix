@@ -110,11 +110,12 @@ in
               {
                 inputs',
                 self',
+                pkgs,
                 system,
                 ...
               }:
               inputs.nixpkgs.lib.nixosSystem {
-                inherit system;
+                inherit pkgs system;
                 specialArgs = {
                   inherit
                     system
