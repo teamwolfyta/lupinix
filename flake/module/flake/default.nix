@@ -28,7 +28,10 @@ let
           system = mkOption {
             type = types.str;
           };
-          modules = mkModuleOption;
+          modules = mkOption {
+            type = types.listOf types.deferredModule;
+            default = [ ];
+          };
           configuration = mkOption {
             type = types.unspecified;
           };
